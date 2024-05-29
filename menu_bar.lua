@@ -137,7 +137,11 @@ function MenuBar.new(themeManager, notebook, window)
 				local buf = sourceview:get_buffer()
 				local content = buf:get_text(buf:get_start_iter(), buf:get_end_iter())
 				self.dialog.save_file_dialog_box("Save File", content)
+				return
 			end
+
+			self.dialog.show_alert("VOCE PRECISA FICAR DE BOA MANO", Gtk.MessageType.WARNING)
+			
 		end
 
 		file_menu:append(save_file_item)

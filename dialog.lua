@@ -6,7 +6,6 @@ end
 
 function Dialog.new(window)
     local self = {}
-
     function self.save_file_dialog_box(dialog_box_title, content)
         local dialog = Gtk.FileChooserDialog({
             title = dialog_box_title,
@@ -28,7 +27,20 @@ function Dialog.new(window)
         end
         dialog:destroy()
     end
-    
+
+    function self.show_alert(message, message_type)
+         local dialog = Gtk.MessageDialog({
+            transient_for = window,
+            modal = true,
+            buttons = Gtk.ButtonsType.OK,
+            message_type = message_type,
+            text = message
+         })
+         dialog:run()
+         dialog:destroy()
+    end 
+
+
     return self
 end
 
