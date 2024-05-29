@@ -1,3 +1,5 @@
+local Dialog = require("dialog")
+
 local MenuBar = {}
 
 function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
@@ -7,8 +9,11 @@ function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
 	GtkSource = source
 end
 
+Dialog.init(Gtk)
+
 function MenuBar.new(themeManager, notebook, window)
 	local self = {}
+	self.dialog = Dialog.new(window)
 
 	function self:apply_css_to_all_tabs()
 		for i = 0, notebook.notebook:get_n_pages() - 1 do
@@ -82,7 +87,7 @@ function MenuBar.new(themeManager, notebook, window)
 
 		local new_file_item = Gtk.MenuItem({ label = "New File", visible = true })
 		new_file_item.on_activate = function()
-			print("Selected file")
+			notebook:create_tab()
 		end
 
 		file_menu:append(new_file_item)
@@ -119,6 +124,9 @@ function MenuBar.new(themeManager, notebook, window)
 		end
 
 		file_menu:append(open_file_item)
+		
+
+
 
 		local save_file_item = Gtk.MenuItem({ label = "Save File", visible = true })
 		save_file_item.on_activate = function()
@@ -128,25 +136,7 @@ function MenuBar.new(themeManager, notebook, window)
 				local sourceview = nth_page:get_child()
 				local buf = sourceview:get_buffer()
 				local content = buf:get_text(buf:get_start_iter(), buf:get_end_iter())
-				local dialog = Gtk.FileChooserDialog({
-					title = "Save File",
-					action = Gtk.FileChooserAction.SAVE,
-					transient_for = window,
-					modal = true
-				})
-				dialog:add_button("Cancel", Gtk.ResponseType.CANCEL)
-				dialog:add_button("Save", Gtk.ResponseType.ACCEPT)
-				dialog:set_do_overwrite_confirmation(true)
-
-				if dialog:run() == Gtk.ResponseType.ACCEPT then
-					local filename = dialog:get_filename()
-					local file = io.open(filename, "w")
-					if file then
-						file:write(content)
-						file:close()
-					end
-				end
-				dialog:destroy()
+				self.dialog.save_file_dialog_box("Save File", content)
 			end
 		end
 

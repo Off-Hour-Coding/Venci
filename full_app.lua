@@ -23,8 +23,8 @@ function app:on_startup()
     local win = Gtk.ApplicationWindow({
         title = appTitle,
         application = self,
-        default_width = 400,
-        default_height = 400
+        default_width = 1000,
+        default_height = 800
     })
  
 	local notebook = Notebook.new(TextEditor)
