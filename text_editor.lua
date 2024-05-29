@@ -27,6 +27,10 @@ function TextEditor.new(content)
 		visible = true,
 		child = self.text_view
 	}
+	
+	function self:get_text()
+		return self.text_buffer:get_text()
+	end
 
 	return self
 end

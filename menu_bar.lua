@@ -120,9 +120,34 @@ function MenuBar.new(themeManager, notebook, window)
 
 		file_menu:append(open_file_item)
 
-		local save_file_item = Gtk.MenuItem({ label = "Save File", visible = true})
-		save_file_item.on_activate = function ()
-			print("Save file option")
+		local save_file_item = Gtk.MenuItem({ label = "Save File", visible = true })
+		save_file_item.on_activate = function()
+			local current_page = notebook.notebook:get_current_page()
+			if current_page >= 0 then
+				local nth_page = notebook.notebook:get_nth_page(current_page)
+				local sourceview = nth_page:get_child()
+				local buf = sourceview:get_buffer()
+				local content = buf:get_text(buf:get_start_iter(), buf:get_end_iter())
+				local dialog = Gtk.FileChooserDialog({
+					title = "Save File",
+					action = Gtk.FileChooserAction.SAVE,
+					transient_for = window,
+					modal = true
+				})
+				dialog:add_button("Cancel", Gtk.ResponseType.CANCEL)
+				dialog:add_button("Save", Gtk.ResponseType.ACCEPT)
+				dialog:set_do_overwrite_confirmation(true)
+
+				if dialog:run() == Gtk.ResponseType.ACCEPT then
+					local filename = dialog:get_filename()
+					local file = io.open(filename, "w")
+					if file then
+						file:write(content)
+						file:close()
+					end
+				end
+				dialog:destroy()
+			end
 		end
 
 		file_menu:append(save_file_item)
