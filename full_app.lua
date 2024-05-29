@@ -4,7 +4,6 @@ local Pango = lgi.require("Pango")
 local GtkSource = lgi.require("GtkSource", "3.0")
 
 local ThemeManager = require("theme_manager")
-local FontManager = require("font_manager")
 local TextEditor = require("text_editor")
 local Notebook = require("notebook")
 local MenuBar = require("menu_bar")
@@ -30,9 +29,8 @@ function app:on_startup()
 	local notebook = Notebook.new(TextEditor)
 
     local themeManager = ThemeManager.new()
-	local fontManager = FontManager.new(notebook)
 
-    local menuBar = MenuBar.new(themeManager, fontManager, notebook.notebook)
+    local menuBar = MenuBar.new(themeManager, notebook.notebook)
 
     local box = Gtk.Box({
         visible = true,

@@ -6,7 +6,7 @@ function MenuBar.init(gtk, source, pango) -- pango for font stuff
 	GtkSource = source
 end
 
-function MenuBar.new(themeManager, fontManager, notebook)
+function MenuBar.new(themeManager, notebook)
     local self = {}
 
 	function self:set_font(font_desc)
