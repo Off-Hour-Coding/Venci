@@ -22,7 +22,7 @@ build = {
    },
    install = {
      bin = {
-        venci = 'full_app.lua'
+        venci = 'app.lua'
      }
    }
 }
