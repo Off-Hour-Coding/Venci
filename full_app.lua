@@ -15,8 +15,8 @@ TextEditor.init(Gtk, GtkSource)
 Notebook.init(Gtk)
 MenuBar.init(Gtk, Gdk, GtkSource, Pango)
 
-local appID = "io.github.Miqueas.GTK-Examples.Lua.Gtk3.Notebook"
-local appTitle = "GtkNotebook"
+local appID = "tsukigva2-kerlon.text.app"
+local appTitle = "VENCI"
 local app = Gtk.Application({ application_id = appID })
 
 function app:on_startup()
