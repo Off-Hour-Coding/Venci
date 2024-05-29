@@ -1,7 +1,8 @@
 local MenuBar = {}
 
-function MenuBar.init(gtk, source, pango) -- pango for font stuff
+function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
 	Gtk = gtk
+    Gdk = gdk
 	Pango = pango
 	GtkSource = source
 end
@@ -9,20 +10,33 @@ end
 function MenuBar.new(themeManager, notebook)
     local self = {}
 
-	function self:set_font(font_desc)
-		local font_css = "* { font-family: 'Ubuntu Mono Regular';}"
-		
-		local css_provider = Gtk.CssProvider()
-		css_provider:load_from_data(font_css)
+    function self:apply_css_to_all_tabs()
+        for i = 0, notebook:get_n_pages() - 1 do
+            local scrolled_window = notebook:get_nth_page(i)
+            local source_view = scrolled_window:get_child()
+            if GtkSource.View:is_type_of(source_view) then
+                local context = source_view:get_style_context()
+                context:add_class("text-view")
+            end
+        end
+    end
 
-		local context = notebook:get_style_context()
-		context:add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+	function self:set_font(font_family, font_size)
+        local css_provider = Gtk.CssProvider()
+        local css = string.format([[
+            .text-view {
+                font-family: '%s';
+                font-size: %dpx;
+            }
+        ]], font_family:get_name(), font_size / Pango.SCALE)
 
-		local buffer_list = notebook:get_children()
-		for _, child in ipairs(buffer_list) do
-			local view = child:get_child()
-			view:set_override_font(font_description)
-		end
+        css_provider:load_from_data(css)
+
+        local display = Gdk.Display.get_default()
+        local screen = display:get_default_screen()
+        Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        self:apply_css_to_all_tabs()
 	end
 
     function self.create_menu_bar()
@@ -50,8 +64,9 @@ function MenuBar.new(themeManager, notebook)
 			visible = false,
 			on_response = function(dialog, response_id)
 				if response_id == Gtk.ResponseType.OK then
-					local font_desc = dialog:get_font()
-					self:set_font(font_desc)
+					local font_family = dialog:get_font_family()
+                    local font_size = dialog:get_font_size()
+					self:set_font(font_family, font_size)
 				end
 				dialog:hide()
 			end

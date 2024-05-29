@@ -1,5 +1,6 @@
 local lgi = require("lgi")
 local Gtk = lgi.require("Gtk", "3.0")
+local Gdk = lgi.require("Gdk")
 local Pango = lgi.require("Pango")
 local GtkSource = lgi.require("GtkSource", "3.0")
 
@@ -12,7 +13,7 @@ local MenuBar = require("menu_bar")
 ThemeManager.init(GtkSource)
 TextEditor.init(Gtk, GtkSource)
 Notebook.init(Gtk)
-MenuBar.init(Gtk, GtkSource, Pango)
+MenuBar.init(Gtk, Gdk, GtkSource, Pango)
 
 local appID = "io.github.Miqueas.GTK-Examples.Lua.Gtk3.Notebook"
 local appTitle = "GtkNotebook"
