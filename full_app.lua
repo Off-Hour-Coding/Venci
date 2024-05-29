@@ -31,7 +31,7 @@ function app:on_startup()
 
     local themeManager = ThemeManager.new()
 
-    local menuBar = MenuBar.new(themeManager, notebook.notebook, win)
+    local menuBar = MenuBar.new(themeManager, notebook, win)
 
     local box = Gtk.Box({
         visible = true,

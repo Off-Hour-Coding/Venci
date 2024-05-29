@@ -5,7 +5,9 @@ function Notebook.init(gtk)
 end
 
 function Notebook.new(TextEditor)
-	self = {}
+	local self = {}
+
+	self.TextEditor = TextEditor
 
 	self.newTabButton = Gtk.Button({
 		visible = true,
@@ -28,9 +30,8 @@ function Notebook.new(TextEditor)
 		scrollable = true
 	})
 
-	local notebook_obj = self
-	self.newTabButton.on_clicked = (function()
-		local te = TextEditor.new()
+	function self:create_tab(content)
+		local te = TextEditor.new(content)
 
 		local tab_label_box = Gtk.Box({
 			visible = true,
@@ -45,25 +46,31 @@ function Notebook.new(TextEditor)
 			Gtk.Image({ visible = true, icon_name = "window-close-symbolic"})
 		})
 
-		close_button.on_clicked = function ()
-			local page_num = notebook_obj.notebook:get_current_page()
-			notebook_obj.notebook:remove_page(page_num)			
-		end
-
 		tab_label_box:pack_start(tab_label, true, true, 0)
 		tab_label_box:pack_start(close_button, false, false, 0)
 
-		notebook_obj.editor_tab = te.text_editor
-		notebook_obj.te = te
+		self.editor_tab = te.text_editor
+		self.te = te
 
-		notebook_obj.notebook:append_page(
+		self.notebook:append_page(
 			-- Page content
-			notebook_obj.editor_tab,
+			self.editor_tab,
 			-- Page tab widget
 			
 			-- Gtk.Label({ visible = true, label = "Tab"}),
 			tab_label_box
 		)
+
+		local editor_tab = self.editor_tab
+		close_button.on_clicked = (function ()
+			local page_num = self.notebook:page_num(editor_tab)
+			self.notebook:remove_page(page_num)
+		end)
+	end
+
+	local _notebook = self
+	self.newTabButton.on_clicked = (function ()
+		_notebook:create_tab()
 	end)
 
 	return self

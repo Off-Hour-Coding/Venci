@@ -5,8 +5,10 @@ function TextEditor.init(gtk, source)
 	GtkSource = source
 end
 
-function TextEditor.new()
-	self = {}
+function TextEditor.new(content)
+	local self = {}
+
+	self.content = content or ""
 
 	self.text_buffer = GtkSource.Buffer {}
 	self.text_view = GtkSource.View {
@@ -18,6 +20,7 @@ function TextEditor.new()
 
 	self.text_buffer:set_language(GtkSource.LanguageManager():get_language("lua"))
 	self.text_buffer:set_highlight_syntax(true)
+	self.text_buffer:set_text(self.content, self.content:len())
 
 	self.text_editor = Gtk.ScrolledWindow {
 		expand = true,
