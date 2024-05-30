@@ -29,17 +29,16 @@ function Dialog.new(window)
     end
 
     function self.show_alert(message, message_type)
-         local dialog = Gtk.MessageDialog({
+        local dialog = Gtk.MessageDialog({
             transient_for = window,
             modal = true,
             buttons = Gtk.ButtonsType.OK,
             message_type = message_type,
             text = message
-         })
-         dialog:run()
-         dialog:destroy()
-    end 
-
+        })
+        dialog:run()
+        dialog:destroy()
+    end
 
     return self
 end

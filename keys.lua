@@ -13,7 +13,6 @@ function Keys.new()
 
     function self.bind_key(mod, key, f)
         local closure = GObject.Closure(f)
-        
         self.accel_group:connect(key, mod, Gtk.AccelFlags.VISIBLE, closure)
     end
 

@@ -1,5 +1,6 @@
 local Dialog = require("dialog")
-
+local System = require("system")
+local Page = require("page_context")
 local MenuBar = {}
 
 function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
@@ -10,10 +11,16 @@ function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
 end
 
 Dialog.init(Gtk)
+System.init()
+Page.init()
+
 
 function MenuBar.new(themeManager, notebook, window)
 	local self = {}
+
 	self.dialog = Dialog.new(window)
+	self.system = System.new()
+	self.page = Page.new(notebook)
 
 	function self:apply_css_to_all_tabs()
 		for i = 0, notebook.notebook:get_n_pages() - 1 do
@@ -78,7 +85,10 @@ function MenuBar.new(themeManager, notebook, window)
 		})
 
 
+
 		-- file menu
+		self.file_path = ""
+		self.content = ""
 
 		local file_menu = Gtk.Menu({ visible = true })
 		local file_menu_item = Gtk.MenuItem({ label = "File", visible = true, submenu = file_menu })
@@ -105,12 +115,14 @@ function MenuBar.new(themeManager, notebook, window)
 
 			if dialog:run() == Gtk.ResponseType.ACCEPT then
 				local filename = dialog:get_filename()
+				self.file_path = filename
+				self.file_name = self.system.get_filename_from_path(filename)
 				local file = io.open(filename, "r")
 				if file then
 					local content = file:read("*all")
 					file:close()
 
-					notebook:create_tab(content)
+					notebook:create_tab(content, self.file_name)
 
 					if not self.current_theme then
 						dialog:destroy()
@@ -124,11 +136,8 @@ function MenuBar.new(themeManager, notebook, window)
 		end
 
 		file_menu:append(open_file_item)
-		
 
-
-
-		local save_file_item = Gtk.MenuItem({ label = "Save File", visible = true })
+		local save_file_item = Gtk.MenuItem({ label = "Save File as", visible = true })
 		save_file_item.on_activate = function()
 			local current_page = notebook.notebook:get_current_page()
 			if current_page >= 0 then
@@ -140,11 +149,18 @@ function MenuBar.new(themeManager, notebook, window)
 				return
 			end
 
-			self.dialog.show_alert("VOCE PRECISA FICAR DE BOA MANO", Gtk.MessageType.WARNING)
-			
+			self.dialog.show_alert("A file is required to be saved", Gtk.MessageType.WARNING)
 		end
 
 		file_menu:append(save_file_item)
+
+		local save_current = Gtk.MenuItem({ label = "Save", visible = true })
+		save_current.on_activate = (function()
+			local content = self.page.get_page_content()
+			self.system.save_file(self.file_path, content)
+		end)
+
+		file_menu:append(save_current)
 
 		local font_dialog_button = Gtk.MenuItem({ label = "Select Font...", visible = true })
 		font_dialog_button.on_activate = function()

@@ -30,7 +30,8 @@ function Notebook.new(TextEditor)
 		scrollable = true
 	})
 
-	function self:create_tab(content)
+	function self:create_tab(content, tab_name)
+		tab_name = tab_name or "Untitled"
 		local te = TextEditor.new(content)
 
 		local tab_label_box = Gtk.Box({
@@ -39,7 +40,7 @@ function Notebook.new(TextEditor)
 			orientation = Gtk.Orientation.HORIZONTAL
 		})
 
-		local tab_label = Gtk.Label({ visible = true, label = "Tab"})
+		local tab_label = Gtk.Label({ visible = true, label = tab_name})
 		local close_button = Gtk.Button({
 			visible = true,
 			relief = Gtk.ReliefStyle.NONE,

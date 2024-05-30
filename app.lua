@@ -12,6 +12,8 @@ local TextEditor = require("text_editor")
 local Notebook = require("notebook")
 local MenuBar = require("menu_bar")
 local Keys = require("keys")
+local System = require("system")
+local Page = require("page_context")
 
 -- Init sets Gtk and GtkSource for modules
 ThemeManager.init(GtkSource)
@@ -20,9 +22,8 @@ Notebook.init(Gtk)
 MenuBar.init(Gtk, Gdk, GtkSource, Pango)
 Keys.init(Gtk, GObject)
 
-
 local appID = "tsukigva2-kerlon.text.app"
-local appTitle = "VENCI"
+local appTitle = "Venci"
 local app = Gtk.Application({ application_id = appID })
 
 function app:on_startup()
@@ -34,6 +35,9 @@ function app:on_startup()
     })
 
     local keys = Keys.new()
+    System.init()
+    Page.init()
+
     win:add_accel_group(keys.accel_group)
 
     local notebook = Notebook.new(TextEditor)
@@ -42,13 +46,17 @@ function app:on_startup()
 
     local menuBar = MenuBar.new(themeManager, notebook, win)
 
+    local page = Page.new(notebook)
+   
+    local system = System.new()
+
     local box = Gtk.Box({
         visible = true,
         orientation = Gtk.Orientation.VERTICAL
     })
 
     keys.bind_key(Gdk.ModifierType.CONTROL_MASK, Gdk.KEY_s, (function ()
-        print('jd')
+        system.save_file(menuBar.file_path, page.get_page_content())
     end))
 
     box:pack_start(menuBar.create_menu_bar(), false, false, 0)
