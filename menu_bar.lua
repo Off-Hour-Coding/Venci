@@ -139,9 +139,17 @@ function MenuBar.new(themeManager, notebook, window)
 		local save_file_item = Gtk.MenuItem({ label = "Save File as", visible = true })
 		save_file_item.on_activate = function()
 			local content = self.page.get_page_content()
-			self.dialog.save_file_dialog_box("Save File", content)
-			return
+			self.file_path = self.dialog.save_file_dialog_box("Save File", content)
+			local current_page = notebook.notebook:get_current_page()
+			if current_page >= 0 then
+				notebook:close_tab(current_page)
+			end
+			
+			notebook:create_tab(content, self.system.get_filename_from_path(self.file_path))
+
+			if not self.file_path then
 				self.dialog.show_alert("A file is required to be saved", Gtk.MessageType.WARNING)
+			end
 		end
 
 		file_menu:append(save_file_item)

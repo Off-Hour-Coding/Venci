@@ -62,8 +62,19 @@ function Notebook.new(TextEditor)
 			tab_label_box
 		)
 
+		function self:close_tab(page_num)
+			page_num = page_num or self.notebook:get_current_page()
+			if page_num >= 0 then
+				self.notebook:remove_page(page_num)
+				if self.notebook:get_n_pages() == 0 then
+					self.newTabButton:set_visible(true)
+				end
+			end
+		end
+	
+
 		self.newTabButton:set_visible(false)
-		
+
 		local editor_tab = self.editor_tab
 		close_button.on_clicked = (function ()
 			local page_num = self.notebook:page_num(editor_tab)

@@ -24,7 +24,11 @@ function Dialog.new(window)
             if file then
                 file:write(content)
                 file:close()
+               
             end
+            dialog:destroy()
+            return filename
+            
         end
         dialog:destroy()
     end
