@@ -123,7 +123,6 @@ function MenuBar.new(themeManager, notebook, window)
 					file:close()
 
 					notebook:create_tab(content, self.file_name)
-
 					if not self.current_theme then
 						dialog:destroy()
 						return
@@ -139,17 +138,10 @@ function MenuBar.new(themeManager, notebook, window)
 
 		local save_file_item = Gtk.MenuItem({ label = "Save File as", visible = true })
 		save_file_item.on_activate = function()
-			local current_page = notebook.notebook:get_current_page()
-			if current_page >= 0 then
-				local nth_page = notebook.notebook:get_nth_page(current_page)
-				local sourceview = nth_page:get_child()
-				local buf = sourceview:get_buffer()
-				local content = buf:get_text(buf:get_start_iter(), buf:get_end_iter())
-				self.dialog.save_file_dialog_box("Save File", content)
-				return
-			end
-
-			self.dialog.show_alert("A file is required to be saved", Gtk.MessageType.WARNING)
+			local content = self.page.get_page_content()
+			self.dialog.save_file_dialog_box("Save File", content)
+			return
+				self.dialog.show_alert("A file is required to be saved", Gtk.MessageType.WARNING)
 		end
 
 		file_menu:append(save_file_item)
@@ -157,7 +149,11 @@ function MenuBar.new(themeManager, notebook, window)
 		local save_current = Gtk.MenuItem({ label = "Save", visible = true })
 		save_current.on_activate = (function()
 			local content = self.page.get_page_content()
-			self.system.save_file(self.file_path, content)
+			if not self.system.save_file(self.file_path, content) then
+				-- self.dialog.save_file_dialog_box("Save File", content)
+				self.dialog.show_alert("There is no file to save", Gtk.MessageType.ERROR)
+			end
+
 		end)
 
 		file_menu:append(save_current)
