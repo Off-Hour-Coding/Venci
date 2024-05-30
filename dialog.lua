@@ -7,7 +7,7 @@ end
 function Dialog.new(window)
     local self = {}
     function self.save_file_dialog_box(dialog_box_title, content)
-        content = content or ""
+        content = content or "Untitled"
         local dialog = Gtk.FileChooserDialog({
             title = dialog_box_title,
             action = Gtk.FileChooserAction.SAVE,
