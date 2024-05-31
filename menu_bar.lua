@@ -1,6 +1,7 @@
 local Dialog = require("dialog")
 local System = require("system")
 local Page = require("page_context")
+local Font = require("font_manager")
 local MenuBar = {}
 
 function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
@@ -11,6 +12,7 @@ function MenuBar.init(gtk, gdk, source, pango) -- pango for font stuff
 end
 
 Dialog.init(Gtk)
+Font.init(Gtk)
 System.init()
 Page.init()
 
@@ -21,34 +23,14 @@ function MenuBar.new(themeManager, notebook, window)
 	self.dialog = Dialog.new(window)
 	self.system = System.new()
 	self.page = Page.new(notebook)
+	self.font = Font.new(notebook)
+	self.theme_id = ""
 
-	function self:apply_css_to_all_tabs()
-		for i = 0, notebook.notebook:get_n_pages() - 1 do
-			local scrolled_window = notebook.notebook:get_nth_page(i)
-			local source_view = scrolled_window:get_child()
-			if GtkSource.View:is_type_of(source_view) then
-				local context = source_view:get_style_context()
-				context:add_class("text-view")
-			end
-		end
-	end
 
-	function self:set_font(font_family, font_size)
-		local css_provider = Gtk.CssProvider()
-		local css = string.format([[
-            .text-view {
-                font-family: '%s';
-                font-size: %dpx;
-            }
-        ]], font_family:get_name(), font_size / Pango.SCALE)
-
-		css_provider:load_from_data(css)
-
-		local display = Gdk.Display.get_default()
-		local screen = display:get_default_screen()
-		Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-		self:apply_css_to_all_tabs()
+	function self.create_new_tab(...)
+		notebook:create_tab(...)
+		themeManager:apply_theme_to_all_tabs(notebook.notebook, themeManager.current_theme)
+		self.font:apply_css_to_all_tabs()
 	end
 
 	function self.create_menu_bar()
@@ -56,17 +38,14 @@ function MenuBar.new(themeManager, notebook, window)
 		local theme_menu = Gtk.Menu({ visible = true })
 		local theme_menu_item = Gtk.MenuItem({ label = "Themes", visible = true, submenu = theme_menu })
 
-		self.current_theme = nil
-		-- Populate the theme menu with available themes
 		for _, theme_id in ipairs(themeManager:list_themes()) do
 			local item = Gtk.MenuItem({ label = theme_id, visible = true })
 			item.on_activate = function()
 				themeManager:apply_theme_to_all_tabs(notebook.notebook, theme_id)
-				self.current_theme = theme_id
+				themeManager.theme_id = theme_id
 			end
 			theme_menu:append(item)
 		end
-
 
 		local font_menu = Gtk.Menu({ visible = true })
 		local font_menu_item = Gtk.MenuItem({ label = "Font", visible = true, submenu = font_menu })
@@ -78,13 +57,13 @@ function MenuBar.new(themeManager, notebook, window)
 				if response_id == Gtk.ResponseType.OK then
 					local font_family = dialog:get_font_family()
 					local font_size = dialog:get_font_size()
-					self:set_font(font_family, font_size)
+					self.font.current_font = font_family
+					self.font.current_font_size = font_size
+					self.font:set_font(font_family, font_size)
 				end
 				dialog:hide()
 			end
 		})
-
-
 
 		-- file menu
 		self.file_path = ""
@@ -97,7 +76,8 @@ function MenuBar.new(themeManager, notebook, window)
 
 		local new_file_item = Gtk.MenuItem({ label = "New File", visible = true })
 		new_file_item.on_activate = function()
-			notebook:create_tab()
+		self.create_new_tab()
+
 		end
 
 		file_menu:append(new_file_item)
@@ -122,7 +102,7 @@ function MenuBar.new(themeManager, notebook, window)
 					local content = file:read("*all")
 					file:close()
 
-					notebook:create_tab(content, self.file_name)
+					self.create_new_tab(content, self.file_name)
 					if not self.current_theme then
 						dialog:destroy()
 						return
@@ -143,9 +123,11 @@ function MenuBar.new(themeManager, notebook, window)
 			local current_page = notebook.notebook:get_current_page()
 			if current_page >= 0 then
 				notebook:close_tab(current_page)
+				
+
 			end
 			
-			notebook:create_tab(content, self.system.get_filename_from_path(self.file_path))
+			self.create_new_tab(content, self.system.get_filename_from_path(self.file_path))
 
 			if not self.file_path then
 				self.dialog.show_alert("A file is required to be saved", Gtk.MessageType.WARNING)

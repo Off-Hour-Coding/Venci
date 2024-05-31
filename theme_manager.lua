@@ -8,6 +8,7 @@ function ThemeManager.new()
     local self = {}
 
     self.style_scheme_man = GtkSource.StyleSchemeManager.get_default()
+    self.current_theme = ""
 
     function self:list_themes()
         return self.style_scheme_man:get_scheme_ids()
@@ -18,6 +19,7 @@ function ThemeManager.new()
         local style_scheme = style_scheme_manager:get_scheme(theme_name)
         if style_scheme then
             buffer:set_style_scheme(style_scheme)
+            self.current_theme = theme_name
         else
             print("Theme '" .. theme_name .. "' not found.")
         end

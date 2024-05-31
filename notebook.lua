@@ -5,10 +5,11 @@ function Notebook.init(gtk)
 end
 
 function Notebook.new(TextEditor)
-	local self = {}
+		local self = {}
+		self.theme = ""
 
 	self.TextEditor = TextEditor
-
+	
 	self.newTabButton = Gtk.Button({
 		visible = true,
 		halign = Gtk.Align.CENTER,
@@ -30,8 +31,10 @@ function Notebook.new(TextEditor)
 		scrollable = true
 	})
 
-	function self:create_tab(content, tab_name)
+	function self:create_tab(content, tab_name, theme)
 		tab_name = tab_name or "Untitled"
+		self.theme = theme or ""
+
 		local te = TextEditor.new(content)
 
 		local tab_label_box = Gtk.Box({

@@ -6,13 +6,12 @@ local JSONFile = {}
 function JSONFile.write(path, data)
     local file = io.open(path, "w+")
     if file then
-        file:write(cjson.encode_pretty(data))
+        file:write(cjson.encode(data))
         file:close()
     else
         error("Could not open file for writing: " .. path)
     end
 end
-
 function JSONFile.read(path)
     local file = io.open(path, "r")
     if not file then
@@ -58,19 +57,22 @@ function JSONFile.update_value(path, key, new_value)
 
     data[key] = new_value
     file:seek("set", 0)
-    file:write(cjson.encode_pretty(data))
-    file:truncate()
+    file:write(cjson.encode(data))
     file:close()
 end
 
 function JSONFile.append(path, data)
     local file = io.open(path, "a")
     if file then
-        file:write(cjson.encode_pretty(data))
+        file:write(cjson.encode(data))
+
         file:close()
     else
         error("Could not open file for appending: " .. path)
     end
 end
 
+
+
 return JSONFile
+
